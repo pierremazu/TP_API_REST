@@ -22,5 +22,14 @@ http::status ServicesManager::queryService(std::string& out, const std::string& 
 {
     // TODO Questions 1, 3, 4, 5, 7, 9, 11
     (void)out; (void)in; (void)url; (void)method;
-    throw ServiceException(http::status::not_implemented, "Not implemented yet");
+    if (url == "/version") {
+        if (method == http::verb::get) {
+            json::value obj = {{"major", "1"}, {"minor", 0}};
+            out = json::serialize(obj);
+            return http::status::ok;
+        }
+    }
+    else {
+        throw ServiceException(http::status::not_implemented, "Not implemented yet");
+    }
 }
