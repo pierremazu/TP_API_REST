@@ -61,7 +61,7 @@ http::status ServicesManager::queryService(std::string& out, const std::string& 
         status = service->post(value, parseBody());
         break;
     case http::verb::patch:
-        status=service->patch(id,json::value_from(in));
+        status=service->patch(id,parseBody());
         break;
     case http::verb::delete_:
         status=service->remove(id);
