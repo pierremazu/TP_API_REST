@@ -5,8 +5,17 @@
 UserService::UserService(UserDB& userDB) : AbstractService("/user"), userDB_(userDB) {}
 
 http::status UserService::get(json::value& out, std::optional<int> id) const {
-    if (!id)
-        throw ServiceException(http::status::bad_request, "No id");
+    if (!id){
+        json::array res;
+        for (const auto& [id, user] : userDB_.getUsers()) {
+            json::value v = json::value_from(user);
+            v.as_object()["id"] = id;
+            res.push_back(std::move(v));
+        }
+        out = std::move(res);
+        return http::status::ok;
+    }
+
     const User* user = userDB_.getUser(*id);
     if (!user) {
         throw ServiceException(http::status::not_found, "User not found");
