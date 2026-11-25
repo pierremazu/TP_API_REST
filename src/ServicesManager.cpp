@@ -28,24 +28,31 @@ http::status ServicesManager::queryService(std::string& out, const std::string& 
         return http::status::not_found;
     }
 
+    /*int id_int = 0;
+    auto [ptr, ec] = std::from_chars(url.data(), url.data() + url.size(), id_int);
+    if (ec != std::errc{} || url.data() + url.size() - ptr == 0) {
+        return http::status::bad_request;
+    }*/
+    auto id = std::nullopt;
+
     json::value value = {};
-    auto status=http::status::not_found;
+    auto status=http::status::not_implemented;
     switch (method)
     {
     case http::verb::get:
-        status=service->get(value,std::nullopt);
+        status=service->get(value,id);
         out=json::serialize(value);
         return status;
-    case http::verb::post:
-        status=service->post(value,json::parse(in));
+    /*case http::verb::post:
+        status=service->post(value,json::value_from(in));
         out=json::serialize(value);
         return status;
     case http::verb::patch:
-        status=service->patch(std::nullopt,json::parse(in));
+        status=service->patch(id,json::value_from(in));
         return status;
     case http::verb::delete_:
-        status=service->remove(std::nullopt);
-        return status;
+        status=service->remove(id);
+        return status;  */
     default :
         return status;
 

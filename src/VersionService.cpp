@@ -2,6 +2,8 @@
 
 VersionService::VersionService() : AbstractService("/version") {}
 
+
+
 http::status VersionService::get(json::value& out, std::optional<int> /*id*/) const
 {
     out = json::object{
