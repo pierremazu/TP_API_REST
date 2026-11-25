@@ -28,7 +28,7 @@ http::status ServicesManager::queryService(std::string& out, const std::string& 
         throw ServiceException(http::status::not_found,"error");
     }
 
-    std::optional<int> id = 0;
+    std::optional<int> id = std::nullopt;
     std::string_view rest = url.substr(service->getPattern().size());
     if (rest.size() > 1) {
         rest.remove_prefix(1);
@@ -39,6 +39,14 @@ http::status ServicesManager::queryService(std::string& out, const std::string& 
         id = value;
     }
 
+    auto parseBody = [&]() {
+        boost::system::error_code ec;
+        json::value body = json::parse(in, ec);
+        if (ec)
+            throw ServiceException(http::status::bad_request, "Invalid body");
+        return body;
+    };
+
     json::value value;
     http::status status;
     switch (method)
@@ -48,8 +56,9 @@ http::status ServicesManager::queryService(std::string& out, const std::string& 
         out=json::serialize(value);
         break;
     case http::verb::post:
-        status=service->post(value,json::value_from(in));
-        out=json::serialize(value);
+        if (id)
+            throw ServiceException(http::status::method_not_allowed, "POST on an element");
+        status = service->post(value, parseBody());
         break;
     case http::verb::patch:
         status=service->patch(id,json::value_from(in));
