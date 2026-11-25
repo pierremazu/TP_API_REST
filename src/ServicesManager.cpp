@@ -11,11 +11,9 @@ void ServicesManager::registerService(std::unique_ptr<AbstractService> service)
 
 AbstractService* ServicesManager::findService(std::string_view url) const
 {
-    for (const auto& service : services_)
-    {
-        if (url.starts_with(service->getPattern()))
-        {
-            return(service.get());
+    for (const auto& service : services_) {
+        if (url== service->getPattern() || url.starts_with(service->getPattern()+"/")) {
+            return service.get();
         }
     }
     return nullptr;
@@ -26,8 +24,9 @@ http::status ServicesManager::queryService(std::string& out, const std::string& 
 {
     auto service = findService(url);
 
-    if (service==nullptr)
-    {return http::status::not_found;}
+    if (service==nullptr) {
+        return http::status::not_found;
+    }
 
     json::value value = {};
     auto status=http::status::not_found;

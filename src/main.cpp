@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
         address = argv[2];
 
     UserDB userDB;
-    userDB.addUser({"Paul", 23});                // id 1
+    userDB.addUser({"Paul", 23}); // id 1
 
     ServicesManager manager;
     manager.registerService(std::make_unique<VersionService>());
