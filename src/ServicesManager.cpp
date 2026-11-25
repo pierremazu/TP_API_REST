@@ -24,7 +24,7 @@ http::status ServicesManager::queryService(std::string& out, const std::string& 
     (void)out; (void)in; (void)url; (void)method;
     if (url == "/version") {
         if (method == http::verb::get) {
-            json::value obj = {{"major", "1"}, {"minor", 0}};
+            json::value obj = {{"major", 1}, {"minor", 0}};
             out = json::serialize(obj);
             return http::status::ok;
         }
