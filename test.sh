@@ -4,7 +4,7 @@
 #         ./test.sh [url_de_base]          (défaut : http://localhost:8080)
 # Les tests modifient la base : relancez le serveur avant chaque passage.
 
-BASE="${1:-http://localhost:8080}"
+BASE="${1:-http://localhost:9000}"
 pass=0; fail=0
 
 # check <question> <méthode> <chemin> <statut attendu> [corps envoyé] [extrait attendu dans la réponse]
