@@ -12,7 +12,7 @@ void ServicesManager::registerService(std::unique_ptr<AbstractService> service)
 AbstractService* ServicesManager::findService(std::string_view url) const
 {
     for (const auto& service : services_) {
-        if (url== service->getPattern() || url.starts_with(service->getPattern()+"/")) {
+        if (url== service->getPattern() || (url.size() > service->getPattern().size() && url.starts_with(service->getPattern()) && url[service->getPattern().size()]=='/')  ) {
             return service.get();
         }
     }
@@ -25,36 +25,43 @@ http::status ServicesManager::queryService(std::string& out, const std::string& 
     auto service = findService(url);
 
     if (service==nullptr) {
-        return http::status::not_found;
+        throw ServiceException(http::status::not_found,"error");
     }
 
-    /*int id_int = 0;
-    auto [ptr, ec] = std::from_chars(url.data(), url.data() + url.size(), id_int);
-    if (ec != std::errc{} || url.data() + url.size() - ptr == 0) {
-        return http::status::bad_request;
-    }*/
-    auto id = std::nullopt;
+    std::optional<int> id = 0;
+    std::string_view rest = url.substr(service->getPattern().size());
+    if (rest.size() > 1) {
+        rest.remove_prefix(1);
+        int value = 0;
+        auto [ptr, ec] = std::from_chars(rest.data(), rest.data() + rest.size(), value);
+        if (ec != std::errc{} || ptr != rest.data() + rest.size())
+            throw ServiceException(http::status::bad_request, "Bad id");
+        id = value;
+    }
 
-    json::value value = {};
-    auto status=http::status::not_implemented;
+    json::value value;
+    http::status status;
     switch (method)
     {
     case http::verb::get:
         status=service->get(value,id);
         out=json::serialize(value);
-        return status;
-    /*case http::verb::post:
+        break;
+    case http::verb::post:
         status=service->post(value,json::value_from(in));
         out=json::serialize(value);
-        return status;
+        break;
     case http::verb::patch:
         status=service->patch(id,json::value_from(in));
-        return status;
+        break;
     case http::verb::delete_:
         status=service->remove(id);
-        return status;  */
+        break;
     default :
-        return status;
-
+        throw ServiceException(http::status::not_implemented, "Method not implemented");
     }
+
+    if (!value.is_null())
+        out = json::serialize(value);
+    return status;
 }
